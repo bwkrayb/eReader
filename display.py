@@ -5,6 +5,11 @@ from libs.waveshare_epd import epd2in7
 from PIL import Image,ImageDraw,ImageFont 
 import time                                      
 from gpiozero import Button              
+from bs4 import BeautifulSoup
+import ebooklib
+import time
+from ebooklib import epub
+
 
 btn1 = Button(5)
 btn2 = Button(6)
@@ -13,6 +18,10 @@ btn4 = Button(19)
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 pageNum = 1
 refreshCount = 0
+screenWidth = 28
+screenHeight = 23
+book = epub.read_epub('books/84.epub')
+
 
 epd = epd2in7.EPD() #264 by 174
 h = epd.height
@@ -29,6 +38,8 @@ def printToDisplay(string):
     fontPageNum = ImageFont.truetype(FONT,10)
     draw.text((indent(string,font,w), 2), string, font = font, fill = 0)
     printInterface(draw,fontPageNum)
+    #lines = ["1234567890123456789012345678", "banana", "cherry","four","five","six","seven","eight","nine","ten","","","","","","","","","","twenty"]
+    #lineOut(draw,fontPageNum,HBlackImage)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
 
@@ -42,6 +53,39 @@ def printInterface(draw,font):
     draw.text((indent('Next',font,w/4)+87,250),'Next',font=font,fill=0)
     draw.text((indent('Exit',font,w/4)+130,250),'Exit',font=font,fill=0)
     draw.text((indent(str(pageNum),font,w)+80, 235), str(pageNum), font = font, fill = 0)
+
+
+#def lineOut(draw,font,lines):
+#    h=10
+#    for i in lines:
+#        draw.text((indent(i,font,w),20+h),i,font=font,fill=0)
+#        h+=10
+
+def lineOut():
+    HBlackImage = Image.new('1', (w, h), 255)  # 264x174
+    draw = ImageDraw.Draw(HBlackImage)
+    font = ImageFont.truetype(FONT,30)
+    fontPageNum = ImageFont.truetype(FONT,10)
+    printInterface(draw,fontPageNum)
+    for html in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
+        soup = BeautifulSoup(html.get_body_content(),'html5lib')
+        htmlString = soup.get_text()
+        htmlString = htmlString.replace("\t"," ").replace("\r"," ").replace("\n"," ")
+        htmlList = [htmlString[i:i+screenWidth] for i in range(0,len(htmlString),screenWidth)] 
+        x = 0
+        n = 0
+        for i in htmlList:
+            draw = ImageDraw.Draw(HBlackImage)
+            draw.text((indent(i,fontPageNum,w),n),i,font=fontPageNum,fill=0)
+            n+=10
+            x+=1
+            if x % screenHeight == 0:
+                epd.display(epd.getbuffer(HBlackImage))
+                btn3.wait_for_press()
+                n=0
+                #x=0
+                HBlackImage = Image.new('1', (w, h), 255)  # 264x174
+                printInterface(draw,fontPageNum)
 
 def screenCleanup():
     global refreshCount
@@ -62,7 +106,7 @@ def prevPage():
     
 def handleBtnPress(btn):
     if btn.pin.number == 5:
-        printToDisplay('Menu')
+        lineOut()
     if btn.pin.number == 6:
         prevPage()
         printToDisplay('Page '+str(pageNum))
@@ -72,26 +116,13 @@ def handleBtnPress(btn):
     if btn.pin.number == 19:
         printToDisplay('Goodbye')
 
- 
-    # python hack for a switch statement. The number represents the pin number and
-    # the value is the message we will print
-    #switcher = {
-    #    5: "Hello, World!",
-    #    6: "This is my first \nRPi project.",
-    #    13: "Hope you liked it.",
-    #    19: "Goodbye"
-    #}
-    # get the string based on the passed in button and send it to printToDisplay()
-    #msg = switcher.get(btn.pin.number, "Error")
-    #printToDisplay(msg)
-
 
 try:
     printToDisplay('Welcome!')
     while True:    
         btn1.when_pressed = handleBtnPress
         btn2.when_pressed = handleBtnPress
-        btn3.when_pressed = handleBtnPress
+##        btn3.when_pressed = handleBtnPress
         if btn4.is_pressed:
             btn4.when_pressed = handleBtnPress
             time.sleep(5)
