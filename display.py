@@ -12,6 +12,7 @@ btn3 = Button(13)
 btn4 = Button(19) 
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 pageNum = 1
+refreshCount = 0
 
 epd = epd2in7.EPD() #264 by 174
 h = epd.height
@@ -28,6 +29,7 @@ def printToDisplay(string):
     fontPageNum = ImageFont.truetype(FONT,10)
     draw.text((indent(string,font,w), 2), string, font = font, fill = 0)
     printInterface(draw,fontPageNum)
+    screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
 
 def printInterface(draw,font):
@@ -41,6 +43,13 @@ def printInterface(draw,font):
     draw.text((indent('Exit',font,w/4)+130,250),'Exit',font=font,fill=0)
     draw.text((indent(str(pageNum),font,w)+80, 235), str(pageNum), font = font, fill = 0)
 
+def screenCleanup():
+    global refreshCount
+    refreshCount +=1
+    if refreshCount == 10:
+        epd.init()
+        epd.Clear()
+        refreshCount = 0
 
 def nextPage():
     global pageNum
@@ -53,13 +62,13 @@ def prevPage():
     
 def handleBtnPress(btn):
     if btn.pin.number == 5:
-        printToDisplay('Button1')
+        printToDisplay('Menu')
     if btn.pin.number == 6:
         prevPage()
-        printToDisplay('Pg:'+str(pageNum))
+        printToDisplay('Page '+str(pageNum))
     if btn.pin.number == 13:
         nextPage()
-        printToDisplay('Pg:'+str(pageNum)) 
+        printToDisplay('Page '+str(pageNum)) 
     if btn.pin.number == 19:
         printToDisplay('Goodbye')
 
