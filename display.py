@@ -22,11 +22,25 @@ epd.Clear()             # clear the display
 #print('h:'+str(h)+' w:'+str(w))
 
 def printToDisplay(string):
-    HBlackImage = Image.new('1', (w, h), 255)  # 298*126
+    HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
-    font = ImageFont.truetype(FONT, 30)
-    draw.text((25, 65), string, font = font, fill = 0)
+    font = ImageFont.truetype(FONT,30)
+    fontPageNum = ImageFont.truetype(FONT,10)
+    draw.text((indent(string,font,w), 2), string, font = font, fill = 0)
+    printInterface(draw,fontPageNum)
     epd.display(epd.getbuffer(HBlackImage))
+
+def printInterface(draw,font):
+    draw.line((0,250,174,250),fill=0,width=1)
+    draw.line((43,250,43,264),fill=0,width=1)
+    draw.line((87,250,87,264),fill=0,width=1)
+    draw.line((130,250,130,264),fill=0,width=1)
+    draw.text((indent('Menu',font,w/4),250),'Menu',font=font,fill=0)
+    draw.text((indent('Prev',font,w/4)+43,250),'Prev',font=font,fill=0)
+    draw.text((indent('Next',font,w/4)+87,250),'Next',font=font,fill=0)
+    draw.text((indent('Exit',font,w/4)+130,250),'Exit',font=font,fill=0)
+    draw.text((indent(str(pageNum),font,w)+80, 235), str(pageNum), font = font, fill = 0)
+
 
 def nextPage():
     global pageNum
@@ -34,7 +48,8 @@ def nextPage():
 
 def prevPage():
     global pageNum
-    pageNum -=1
+    if pageNum > 1:
+        pageNum -=1
     
 def handleBtnPress(btn):
     if btn.pin.number == 5:
@@ -63,6 +78,7 @@ def handleBtnPress(btn):
 
 
 try:
+    printToDisplay('Welcome!')
     while True:    
         btn1.when_pressed = handleBtnPress
         btn2.when_pressed = handleBtnPress
