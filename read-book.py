@@ -7,7 +7,7 @@ book = epub.read_epub('books/84.epub')
 
 for html in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
     #print(html.get_body_content())
-    soup = BeautifulSoup(html.get_body_content(),'html.parser')
+    soup = BeautifulSoup(html.get_body_content(),'html5lib')
     #print(soup.prettify())
     print(soup.get_text())
     input()
