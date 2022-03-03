@@ -35,8 +35,10 @@ def printPage(pageNum):
 printPage(0)
 printPage(1)
 printPage(2) # only has 2 lines
-printPage(3) # page doesn't exist, no lines
-
+printPage(5) # page doesn't exist, no lines
+printPage(50)
+printPage(51)
+printPage(52)
 
 
     #print(htmlList)
