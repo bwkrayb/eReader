@@ -3,7 +3,9 @@ import ebooklib
 import time
 from ebooklib import epub
 
-book = epub.read_epub('books/84.epub')
+book = epub.read_epub('books/Harry-Potter-1.epub')
+fullBook = []
+screenHeight=23
 
 for html in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
     #print(html.get_body_content())
@@ -13,20 +15,50 @@ for html in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
     htmlString = htmlString.replace("\t","  ").replace("\r","  ").replace("\n","  ").replace("      "," ")
     #print(html.get_id())
     #print(html.is_chapter())
-    print(html)
+    #print(html)
     htmlList = [htmlString[i:i+28] for i in range(0,len(htmlString),28)]
-    #print(htmlList)
-    x = 0
+#    x = 0
     for i in htmlList:
-        print(i)
-        x+=1
-        if x % 20 == 0:
-            nextInput = input()
-            if nextInput == 'q':
-                break
-    contVar = input()
-    if contVar == 'q':
-        break
+        fullBook.append(i)
+#        x+=1
+
+
+
+def printPage(pageNum):
+    print("pageNum: " + str(pageNum))
+
+    for i in range(screenHeight):
+        listIndex = (pageNum * screenHeight) + i
+        if listIndex < len(fullBook):
+            print(fullBook[listIndex])
+
+printPage(0)
+printPage(1)
+printPage(2) # only has 2 lines
+printPage(3) # page doesn't exist, no lines
+
+
+
+    #print(htmlList)
+    #x = 0
+    #for i in htmlList:
+    #    print(i)
+    #    x+=1
+    #    if x % 20 == 0:
+    #        nextInput = input()
+    #        if nextInput == 'q':
+    #            break
+    #contVar = input()
+    #if contVar == 'q':
+    #    break
+
+print(len(fullBook))
+
+print(fullBook[20])
+
+print(fullBook[1500])
+
+print(type(fullBook))
 
 #htmlItems = book.get_items_of_type(ebooklib.ITEM_DOCUMENT)
 #print(type(htmlItems))

@@ -82,11 +82,11 @@ def lineOut():
             x+=1
             if x % screenHeight == 0:
                 epd.display(epd.getbuffer(HBlackImage))
-                #Button(13).wait_for_press()
-                time.sleep(1)
+                time.sleep(.2)
                 HBlackImage = Image.new('1', (w, h), 255) 
                 while True:
                     if btn3.is_pressed:
+                        screenCleanup()
                         nextPage()
                         break
                     if btn4.is_pressed:
