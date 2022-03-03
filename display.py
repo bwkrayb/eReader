@@ -1,4 +1,4 @@
-import sys                     # import sys
+import sys        
 sys.path.insert(1, "./libs")             
 from functions import indent
 from libs.waveshare_epd import epd2in7
@@ -9,19 +9,29 @@ from bs4 import BeautifulSoup
 import ebooklib
 import time
 from ebooklib import epub
-
+import os.path
+from os import path
 
 btn1 = Button(5)
 btn2 = Button(6)
 btn3 = Button(13)
 btn4 = Button(19) 
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
-pageNum = 0
 refreshCount = 0
 screenWidth = 28
 screenHeight = 23
-book = epub.read_epub('books/Harry-Potter-1.epub')
+books_dir='books/'
+cache_dir='cache/'
+book = epub.read_epub(books_dir + 'Harry-Potter-1.epub')
 fullBook = []
+
+if path.exists(cache_dir + 'Harry-Potter-1.cache'):
+    f = open(cache_dir + 'Harry-Potter-1.cache')
+    pageNumStr = f.read()
+    pageNum = int(pageNumStr)
+    f.close()
+else:
+    pageNum = 0
 
 epd = epd2in7.EPD() #264 by 174
 h = epd.height
@@ -29,6 +39,10 @@ w = epd.width
 epd.init()              # initialize the display
 epd.Clear()             # clear the display
 
+def pageNumCache():
+    f = open(cache_dir + 'Harry-Potter-1.cache','w')
+    f.write(str(pageNum))
+    f.close()
 
 def printToDisplay(string):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
@@ -87,7 +101,7 @@ def printPage(pageNum):
     printInterface(draw,font)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
-
+    pageNumCache()
 
 def screenCleanup():
     global refreshCount
