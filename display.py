@@ -40,6 +40,15 @@ def printToDisplay(string):
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
 
+def printToSplash(string):
+    HBlackImage = Image.new('1', (w, h), 255)  # 264x174
+    draw = ImageDraw.Draw(HBlackImage)
+    font = ImageFont.truetype(FONT,30)
+    fontPageNum = ImageFont.truetype(FONT,10)
+    draw.text((indent(string,font,w), 100), string, font = font, fill = 0)
+    screenCleanup()
+    epd.display(epd.getbuffer(HBlackImage))
+
 def printInterface(draw,font):
     draw.line((0,250,174,250),fill=0,width=1)
     draw.line((43,250,43,264),fill=0,width=1)
@@ -107,19 +116,19 @@ def handleBtnPress(btn):
         nextPage()
         printPage(pageNum) 
     if btn.pin.number == 19:
-        printToDisplay('Goodbye')
-
+        printToSplash('Goodbye')
 
 try:
-    printToDisplay('Welcome!')
+    printToSplash('Loading')
     lineOut()
+    printToDisplay('Welcome!')
     while True:    
         btn1.when_pressed = handleBtnPress
         btn2.when_pressed = handleBtnPress
         btn3.when_pressed = handleBtnPress
         if btn4.is_pressed:
             btn4.when_pressed = handleBtnPress
-            time.sleep(5)
+            time.sleep(3)
             break
 
 except IOError as e:
