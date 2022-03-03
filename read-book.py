@@ -10,12 +10,12 @@ for html in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
     soup = BeautifulSoup(html.get_body_content(),'html5lib')
     #print(soup.prettify())
     htmlString = soup.get_text()
-    htmlString = htmlString.replace("\t","").replace("\r","").replace("\n","")
-    print(html.get_id())
-    print(html.is_chapter())
+    htmlString = htmlString.replace("\t","  ").replace("\r","  ").replace("\n","  ").replace("      "," ")
+    #print(html.get_id())
+    #print(html.is_chapter())
     print(html)
     htmlList = [htmlString[i:i+28] for i in range(0,len(htmlString),28)]
-    print(htmlList)
+    #print(htmlList)
     x = 0
     for i in htmlList:
         print(i)

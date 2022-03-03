@@ -20,7 +20,7 @@ pageNum = 1
 refreshCount = 0
 screenWidth = 28
 screenHeight = 23
-book = epub.read_epub('books/84.epub')
+book = epub.read_epub('books/Harry-Potter-1.epub')
 
 
 epd = epd2in7.EPD() #264 by 174
@@ -70,22 +70,31 @@ def lineOut():
     for html in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
         soup = BeautifulSoup(html.get_body_content(),'html5lib')
         htmlString = soup.get_text()
-        htmlString = htmlString.replace("\t"," ").replace("\r"," ").replace("\n"," ")
+        htmlString = htmlString.replace("\t","").replace("\r","").replace("\n","").replace("    "," ")
         htmlList = [htmlString[i:i+screenWidth] for i in range(0,len(htmlString),screenWidth)] 
         x = 0
         n = 0
         for i in htmlList:
             draw = ImageDraw.Draw(HBlackImage)
+            printInterface(draw,fontPageNum)
             draw.text((indent(i,fontPageNum,w),n),i,font=fontPageNum,fill=0)
             n+=10
             x+=1
             if x % screenHeight == 0:
                 epd.display(epd.getbuffer(HBlackImage))
-                btn3.wait_for_press()
+                #Button(13).wait_for_press()
+                time.sleep(1)
+                HBlackImage = Image.new('1', (w, h), 255) 
+                while True:
+                    if btn3.is_pressed:
+                        nextPage()
+                        break
+                    if btn4.is_pressed:
+                        printToDisplay('Goodbye')
+                        raise Exception("Quit")
                 n=0
-                #x=0
-                HBlackImage = Image.new('1', (w, h), 255)  # 264x174
-                printInterface(draw,fontPageNum)
+                x=0
+
 
 def screenCleanup():
     global refreshCount
@@ -110,23 +119,25 @@ def handleBtnPress(btn):
     if btn.pin.number == 6:
         prevPage()
         printToDisplay('Page '+str(pageNum))
-    if btn.pin.number == 13:
-        nextPage()
-        printToDisplay('Page '+str(pageNum)) 
+#    if btn.pin.number == 13:
+#        nextPage()
+#        printToDisplay('Page '+str(pageNum)) 
     if btn.pin.number == 19:
         printToDisplay('Goodbye')
 
 
 try:
     printToDisplay('Welcome!')
-    while True:    
-        btn1.when_pressed = handleBtnPress
-        btn2.when_pressed = handleBtnPress
+    time.sleep(2)
+    lineOut()
+#    while True:    
+#        btn1.when_pressed = handleBtnPress
+##        btn2.when_pressed = handleBtnPress
 ##        btn3.when_pressed = handleBtnPress
-        if btn4.is_pressed:
-            btn4.when_pressed = handleBtnPress
-            time.sleep(5)
-            break
+#        if btn4.is_pressed:
+#            btn4.when_pressed = handleBtnPress
+#            time.sleep(5)
+#            break
 
 except IOError as e:
     print(e)
