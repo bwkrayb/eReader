@@ -27,7 +27,7 @@ books_dir='books/'
 cache_dir='cache/'
 bookNameList = []
 fullBook = []
-bookListFull = glob.glob(books_dir + "*.epub")
+bookListFull = sorted(glob.glob(books_dir + "*.epub"))
 for i in bookListFull:
     x = i.split('/')
     bookNameList.append(x[-1])
@@ -35,9 +35,11 @@ for i in bookListFull:
 
 def checkLastRead():
     global book
+    global bookNum
     if path.exists(cache_dir + 'last-read.cache'):
         f = open(cache_dir + 'last-read.cache')
         book = f.read()
+        bookNum = bookNameList.index(book)
         f.close()
     else:
         book = bookNameList[bookNum]
@@ -102,6 +104,7 @@ def printInterface(draw,font):
 
 
 def lineOut():
+    global fullBook
     bookRead = epub.read_epub(books_dir + book)
     font = ImageFont.truetype(FONT,30)
     fontPageNum = ImageFont.truetype(FONT,10)
@@ -145,19 +148,21 @@ def nextPage():
 
 def prevPage():
     global pageNum
-    if pageNum > 1:
+    if pageNum > 0:
         pageNum -=1
 
 def nextBook():
     global book
     global bookNum
-    bookNum +=1
+    if bookNum < len(bookNameList): 
+        bookNum +=1
     book = bookNameList[bookNum]
 
 def prevBook():
     global book
     global bookNum
-    bookNum -=1
+    if bookNum > 0:
+        bookNum -=1
     book = bookNameList[bookNum]
     
 def handleBtnPress(btn):
@@ -183,11 +188,14 @@ def handleMenuBtn(btn):
         printToSplash('Goodbye')
 
 def menuLoop():
+    global book
+    global bookNum
     while True:
         if btn1.is_pressed:
+            book = bookNameList[bookNum]
             printToSplash('Loading')
-            lineOut()
             checkLastPage()
+            lineOut()
             pageTurnLoop()
             #btn1.when_pressed = handleMenuBtn
         btn2.when_pressed = handleMenuBtn
