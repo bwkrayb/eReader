@@ -3,15 +3,16 @@ sys.path.insert(1, "./libs")
 from functions import indent
 from libs.waveshare_epd import epd2in7
 from PIL import Image,ImageDraw,ImageFont 
-import time                                      
+#import time                                      
+from time import sleep
 from gpiozero import Button              
 from bs4 import BeautifulSoup
 import ebooklib
-import time
 from ebooklib import epub
 import os.path
 from os import path
 import glob
+from math import ceil
 
 btn1 = Button(5)
 btn2 = Button(6)
@@ -21,6 +22,7 @@ FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 refreshCount = 0
 pageNum = 0
 bookNum = 0
+bookLen = 0
 screenWidth = 28
 screenHeight = 23
 books_dir='books/'
@@ -46,14 +48,18 @@ def checkLastRead():
 
 def checkLastPage():
     global pageNum
+    global bookLen
     if path.exists(cache_dir + book.split('.')[0] + '.cache'):
         f = open(cache_dir + book.split('.')[0] + '.cache')
         pageNumStr = f.read()
+        #pageNumList = [line.strip() for line in pageNumStr]
         pageNum = int(pageNumStr)
+        bookLen = ceil(len(fullBook) / screenHeight)
         f.close()
     else:
         pageNum = 0
-
+        bookLen = ceil(len(fullBook) / screenHeight)
+ 
 epd = epd2in7.EPD() #264 by 174
 h = epd.height
 w = epd.width
@@ -61,6 +67,7 @@ epd.init()              # initialize the display
 epd.Clear()             # clear the display
 
 def pageNumCache():
+    bookLen = ceil(len(fullBook) / screenHeight)
     bookFileName=book.split('.')
     f = open(cache_dir + bookFileName[0]+'.cache','w')
     f.write(str(pageNum))
@@ -115,6 +122,8 @@ def printMenuInterface(draw,font):
 
 def lineOut():
     global fullBook
+    global book
+    fullBook = []
     bookRead = epub.read_epub(books_dir + book)
     font = ImageFont.truetype(FONT,30)
     fontPageNum = ImageFont.truetype(FONT,10)
@@ -199,10 +208,10 @@ def handleMenuBtn(btn):
 
 def menuLoop():
     global book
-    #global bookNum
+    global bookNum
     while True:
         if btn1.is_pressed:
-            book = bookNameList[bookNum]
+            #book = bookNameList[bookNum]
             printToSplash('Loading')
             checkLastPage()
             lineOut()
@@ -212,7 +221,7 @@ def menuLoop():
         btn3.when_pressed = handleMenuBtn
         if btn4.is_pressed:
             btn4.when_pressed = handleMenuBtn
-            time.sleep(3)
+            sleep(3)
             raise Exception("Quit")
     #printToSplash('Loading')
     #lineOut()
@@ -226,7 +235,7 @@ def pageTurnLoop():
         btn3.when_pressed = handleBtnPress
         if btn4.is_pressed:
             btn4.when_pressed = handleBtnPress
-            time.sleep(3)
+            sleep(1.5)
             break
 
 try:
@@ -242,7 +251,7 @@ try:
     #    btn3.when_pressed = handleBtnPress
     #    if btn4.is_pressed:
     #        btn4.when_pressed = handleBtnPress
-    #        time.sleep(3)
+    #        sleep(3)
     #        break
 
 except IOError as e:
