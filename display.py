@@ -11,6 +11,7 @@ import time
 from ebooklib import epub
 import os.path
 from os import path
+import glob
 
 btn1 = Button(5)
 btn2 = Button(6)
@@ -18,20 +19,38 @@ btn3 = Button(13)
 btn4 = Button(19) 
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 refreshCount = 0
+pageNum = 0
+bookNum = 0
 screenWidth = 28
 screenHeight = 23
 books_dir='books/'
 cache_dir='cache/'
-book = epub.read_epub(books_dir + 'Harry-Potter-3.epub')
+bookNameList = []
 fullBook = []
+bookListFull = glob.glob(books_dir + "*.epub")
+for i in bookListFull:
+    x = i.split('/')
+    bookNameList.append(x[-1])
 
-if path.exists(cache_dir + 'Harry-Potter-3.cache'):
-    f = open(cache_dir + 'Harry-Potter-3.cache')
-    pageNumStr = f.read()
-    pageNum = int(pageNumStr)
-    f.close()
-else:
-    pageNum = 0
+
+def checkLastRead():
+    global book
+    if path.exists(cache_dir + 'last-read.cache'):
+        f = open(cache_dir + 'last-read.cache')
+        book = f.read()
+        f.close()
+    else:
+        book = bookNameList[bookNum]
+
+def checkLastPage():
+    global pageNum
+    if path.exists(cache_dir + book.split('.')[0] + '.cache'):
+        f = open(cache_dir + book.split('.')[0] + '.cache')
+        pageNumStr = f.read()
+        pageNum = int(pageNumStr)
+        f.close()
+    else:
+        pageNum = 0
 
 epd = epd2in7.EPD() #264 by 174
 h = epd.height
@@ -40,9 +59,15 @@ epd.init()              # initialize the display
 epd.Clear()             # clear the display
 
 def pageNumCache():
-    f = open(cache_dir + 'Harry-Potter-3.cache','w')
+    bookFileName=book.split('.')
+    f = open(cache_dir + bookFileName[0]+'.cache','w')
     f.write(str(pageNum))
     f.close()
+
+def lastReadCache():
+    f = open(cache_dir + 'last-read.cache','w')
+    f.write(book)
+    f.close
 
 def printToDisplay(string):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
@@ -50,6 +75,7 @@ def printToDisplay(string):
     font = ImageFont.truetype(FONT,30)
     fontPageNum = ImageFont.truetype(FONT,10)
     draw.text((indent(string,font,w), 2), string, font = font, fill = 0)
+    draw.text((indent(book,fontPageNum,w),100),book,font=fontPageNum,fill=0)
     printInterface(draw,fontPageNum)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
@@ -76,9 +102,10 @@ def printInterface(draw,font):
 
 
 def lineOut():
+    bookRead = epub.read_epub(books_dir + book)
     font = ImageFont.truetype(FONT,30)
     fontPageNum = ImageFont.truetype(FONT,10)
-    for html in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
+    for html in bookRead.get_items_of_type(ebooklib.ITEM_DOCUMENT):
         soup = BeautifulSoup(html.get_body_content(),'html5lib')
         htmlString = soup.get_text()
         htmlString = htmlString.replace("\t","").replace("\r","").replace("\n","").replace("    "," ")
@@ -102,6 +129,7 @@ def printPage(pageNum):
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
     pageNumCache()
+    lastReadCache()
 
 def screenCleanup():
     global refreshCount
@@ -119,6 +147,18 @@ def prevPage():
     global pageNum
     if pageNum > 1:
         pageNum -=1
+
+def nextBook():
+    global book
+    global bookNum
+    bookNum +=1
+    book = bookNameList[bookNum]
+
+def prevBook():
+    global book
+    global bookNum
+    bookNum -=1
+    book = bookNameList[bookNum]
     
 def handleBtnPress(btn):
     if btn.pin.number == 5:
@@ -130,20 +170,61 @@ def handleBtnPress(btn):
         nextPage()
         printPage(pageNum) 
     if btn.pin.number == 19:
+        printToDisplay('Welcome!')
+
+def handleMenuBtn(btn):
+    if btn.pin.number == 6:
+        prevBook()
+        printToDisplay('Welcome!')
+    if btn.pin.number == 13:
+        nextBook()
+        printToDisplay('Welcome!')
+    if btn.pin.number == 19:
         printToSplash('Goodbye')
 
-try:
-    printToSplash('Loading')
-    lineOut()
-    printToDisplay('Welcome!')
-    while True:    
-        btn1.when_pressed = handleBtnPress
+def menuLoop():
+    while True:
+        if btn1.is_pressed:
+            printToSplash('Loading')
+            lineOut()
+            checkLastPage()
+            pageTurnLoop()
+            #btn1.when_pressed = handleMenuBtn
+        btn2.when_pressed = handleMenuBtn
+        btn3.when_pressed = handleMenuBtn
+        if btn4.is_pressed:
+            btn4.when_pressed = handleMenuBtn
+            raise Exception("Quit")
+    #printToSplash('Loading')
+    #lineOut()
+    #printPage(pageNum)
+
+def pageTurnLoop():
+    printPage(pageNum)
+    while True:
+        #btn1.when_pressed = handleBtnPress
         btn2.when_pressed = handleBtnPress
         btn3.when_pressed = handleBtnPress
         if btn4.is_pressed:
             btn4.when_pressed = handleBtnPress
             time.sleep(3)
             break
+
+try:
+    checkLastRead()
+    printToDisplay('Welcome!')
+    menuLoop()
+    #printToSplash('Loading')
+    #lineOut()
+    #printPage(pageNum)
+    #while True:    
+    #    btn1.when_pressed = handleBtnPress
+    #    btn2.when_pressed = handleBtnPress
+    #    btn3.when_pressed = handleBtnPress
+    #    if btn4.is_pressed:
+    #        btn4.when_pressed = handleBtnPress
+    #        time.sleep(3)
+    #        break
 
 except IOError as e:
     print(e)
