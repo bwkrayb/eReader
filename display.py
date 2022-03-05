@@ -22,11 +22,11 @@ screenWidth = 28
 screenHeight = 23
 books_dir='books/'
 cache_dir='cache/'
-book = epub.read_epub(books_dir + 'Harry-Potter-1.epub')
+book = epub.read_epub(books_dir + 'Harry-Potter-3.epub')
 fullBook = []
 
-if path.exists(cache_dir + 'Harry-Potter-1.cache'):
-    f = open(cache_dir + 'Harry-Potter-1.cache')
+if path.exists(cache_dir + 'Harry-Potter-3.cache'):
+    f = open(cache_dir + 'Harry-Potter-3.cache')
     pageNumStr = f.read()
     pageNum = int(pageNumStr)
     f.close()
@@ -40,7 +40,7 @@ epd.init()              # initialize the display
 epd.Clear()             # clear the display
 
 def pageNumCache():
-    f = open(cache_dir + 'Harry-Potter-1.cache','w')
+    f = open(cache_dir + 'Harry-Potter-3.cache','w')
     f.write(str(pageNum))
     f.close()
 
