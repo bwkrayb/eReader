@@ -202,6 +202,7 @@ def menuLoop():
         btn3.when_pressed = handleMenuBtn
         if btn4.is_pressed:
             btn4.when_pressed = handleMenuBtn
+            time.sleep(3)
             raise Exception("Quit")
     #printToSplash('Loading')
     #lineOut()
