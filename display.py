@@ -3,7 +3,6 @@ sys.path.insert(1, "./libs")
 from functions import indent
 from libs.waveshare_epd import epd2in7
 from PIL import Image,ImageDraw,ImageFont 
-#import time                                      
 from time import sleep
 from gpiozero import Button              
 from bs4 import BeautifulSoup
@@ -13,6 +12,7 @@ import os.path
 from os import path
 import glob
 from math import ceil
+import textwrap
 
 btn1 = Button(5)
 btn2 = Button(6)
@@ -23,7 +23,7 @@ refreshCount = 0
 pageNum = 0
 bookNum = 0
 bookLen = 0
-screenWidth = 28
+screenWidth = 29
 screenHeight = 23
 books_dir='books/'
 cache_dir='cache/'
@@ -130,8 +130,10 @@ def lineOut():
     for html in bookRead.get_items_of_type(ebooklib.ITEM_DOCUMENT):
         soup = BeautifulSoup(html.get_body_content(),'html5lib')
         htmlString = soup.get_text()
-        htmlString = htmlString.replace("\t","").replace("\r","").replace("\n","").replace("    "," ")
-        htmlList = [htmlString[i:i+screenWidth] for i in range(0,len(htmlString),screenWidth)] 
+        htmlString = htmlString.replace("\t","").replace("\r","").replace("    "," ")##.replace("\n","")
+        #htmlString = htmlString.replace("\n","")
+        #htmlList = [htmlString[i:i+screenWidth] for i in range(0,len(htmlString),screenWidth)] 
+        htmlList = textwrap.wrap(htmlString,width=screenWidth)
         x = 0
         for i in htmlList:
             fullBook.append(i)
@@ -146,7 +148,8 @@ def printPage(pageNum):
         listIndex = (pageNum * screenHeight) + i
         if listIndex < len(fullBook):
             #print(fullBook[listIndex])
-            draw.text((indent(fullBook[listIndex],font,w),i*10),fullBook[listIndex],font=font,fill=0)
+            #draw.text((indent(fullBook[listIndex],font,w),i*10),fullBook[listIndex],font=font,fill=0)
+            draw.text((1,i*10),fullBook[listIndex],font=font,fill=0)
     printInterface(draw,font)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
