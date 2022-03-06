@@ -33,8 +33,7 @@ bookListFull = sorted(glob.glob(books_dir + "*.epub"))
 for i in bookListFull:
     x = i.split('/')
     bookNameList.append(x[-1])
-
-
+    
 def checkLastRead():
     global book
     global bookNum
@@ -120,25 +119,16 @@ def printMenuInterface(draw,font):
     draw.text((indent('Quit',font,w/4)+130,250),'Quit',font=font,fill=0)
     #draw.text((indent(str(pageNum),font,w)+80, 235), str(pageNum), font = font, fill = 0)
 
-def lineOut():
+def loadBook(bookPath):
     global fullBook
-    global book
-    fullBook = []
-    bookRead = epub.read_epub(books_dir + book)
-    font = ImageFont.truetype(FONT,30)
-    fontPageNum = ImageFont.truetype(FONT,10)
+    bookRead = epub.read_epub(bookPath)
     for html in bookRead.get_items_of_type(ebooklib.ITEM_DOCUMENT):
         soup = BeautifulSoup(html.get_body_content(),'html5lib')
         htmlString = soup.get_text()
         htmlString = htmlString.replace("\t","").replace("\r","").replace("    "," ")##.replace("\n","")
         #htmlString = htmlString.replace("\n","")
-        #htmlList = [htmlString[i:i+screenWidth] for i in range(0,len(htmlString),screenWidth)] 
-        htmlList = textwrap.wrap(htmlString,width=screenWidth)
-        x = 0
-        for i in htmlList:
-            fullBook.append(i)
-            x+=1
-
+        #fullBook = [htmlString[i:i+screenWidth] for i in range(0,len(htmlString),screenWidth)] 
+        fullBook = textwrap.wrap(htmlString,width=screenWidth)
 
 def printPage(pageNum):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
@@ -210,6 +200,7 @@ def handleMenuBtn(btn):
         printToSplash('Goodbye')
 
 def menuLoop():
+    global books_dir
     global book
     global bookNum
     while True:
@@ -217,7 +208,7 @@ def menuLoop():
             #book = bookNameList[bookNum]
             printToSplash('Loading')
             checkLastPage()
-            lineOut()
+            loadBook(books_dir + book)
             pageTurnLoop()
             #btn1.when_pressed = handleMenuBtn
         btn2.when_pressed = handleMenuBtn
@@ -227,7 +218,7 @@ def menuLoop():
             sleep(3)
             raise Exception("Quit")
     #printToSplash('Loading')
-    #lineOut()
+    #loadBook()
     #printPage(pageNum)
 
 def pageTurnLoop():
