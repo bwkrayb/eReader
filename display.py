@@ -1,6 +1,4 @@
-import sys        
-sys.path.insert(1, "./libs")             
-from functions import indent
+from libs.functions import indent
 from libs.waveshare_epd import epd2in7
 from PIL import Image,ImageDraw,ImageFont 
 from time import sleep
