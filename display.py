@@ -8,11 +8,10 @@ from gpiozero import Button
 from bs4 import BeautifulSoup
 import ebooklib
 from ebooklib import epub
-import os.path
 from os import path
-import glob
+from glob import glob
 from math import ceil
-import textwrap
+from textwrap import wrap
 
 btn1 = Button(5)
 btn2 = Button(6)
@@ -29,11 +28,16 @@ books_dir='books/'
 cache_dir='cache/'
 bookNameList = []
 fullBook = []
-bookListFull = sorted(glob.glob(books_dir + "*.epub"))
+bookListFull = sorted(glob(books_dir + "*.epub"))
 for i in bookListFull:
     x = i.split('/')
     bookNameList.append(x[-1])
-    
+epd = epd2in7.EPD() #264 by 174
+h = epd.height
+w = epd.width
+epd.init()              # initialize the display
+epd.Clear()             # clear the display
+
 def checkLastRead():
     global book
     global bookNum
@@ -59,12 +63,6 @@ def checkLastPage():
         pageNum = 0
         bookLen = ceil(len(fullBook) / screenHeight)
  
-epd = epd2in7.EPD() #264 by 174
-h = epd.height
-w = epd.width
-epd.init()              # initialize the display
-epd.Clear()             # clear the display
-
 def pageNumCache():
     bookLen = ceil(len(fullBook) / screenHeight)
     bookFileName=book.split('.')
@@ -127,9 +125,7 @@ def loadBook(bookPath):
         soup = BeautifulSoup(chapter.get_body_content(),'html5lib')
         chapterString = soup.get_text()
         chapterString = chapterString.replace("\t","").replace("\r","").replace("    "," ")##.replace("\n","")
-        #chapterString = chapterString.replace("\n","")
-        #chapterString = [chapterString[i:i+screenWidth] for i in range(0,len(chapterString),screenWidth)] 
-        chapterText = textwrap.wrap(chapterString,width=screenWidth)
+        chapterText = wrap(chapterString,width=screenWidth)
         for x in chapterText: # append chapter to fullBook
             fullBook.append(x)
 
@@ -140,8 +136,6 @@ def printPage(pageNum):
     for i in range(screenHeight):
         listIndex = (pageNum * screenHeight) + i
         if listIndex < len(fullBook):
-            #print(fullBook[listIndex])
-            #draw.text((indent(fullBook[listIndex],font,w),i*10),fullBook[listIndex],font=font,fill=0)
             draw.text((1,i*10),fullBook[listIndex],font=font,fill=0)
     printInterface(draw,font)
     screenCleanup()
@@ -208,26 +202,20 @@ def menuLoop():
     global bookNum
     while True:
         if btn1.is_pressed:
-            #book = bookNameList[bookNum]
             printToSplash('Loading')
             checkLastPage()
             loadBook(books_dir + book)
             pageTurnLoop()
-            #btn1.when_pressed = handleMenuBtn
         btn2.when_pressed = handleMenuBtn
         btn3.when_pressed = handleMenuBtn
         if btn4.is_pressed:
             btn4.when_pressed = handleMenuBtn
             sleep(3)
             raise Exception("Quit")
-    #printToSplash('Loading')
-    #loadBook()
-    #printPage(pageNum)
 
 def pageTurnLoop():
     printPage(pageNum)
     while True:
-        #btn1.when_pressed = handleBtnPress
         btn2.when_pressed = handleBtnPress
         btn3.when_pressed = handleBtnPress
         if btn4.is_pressed:
@@ -239,17 +227,6 @@ try:
     checkLastRead()
     printToDisplay('Welcome!')
     menuLoop()
-    #printToSplash('Loading')
-    #lineOut()
-    #printPage(pageNum)
-    #while True:    
-    #    btn1.when_pressed = handleBtnPress
-    #    btn2.when_pressed = handleBtnPress
-    #    btn3.when_pressed = handleBtnPress
-    #    if btn4.is_pressed:
-    #        btn4.when_pressed = handleBtnPress
-    #        sleep(3)
-    #        break
 
 except IOError as e:
     print(e)
