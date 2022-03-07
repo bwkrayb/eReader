@@ -121,6 +121,7 @@ def printMenuInterface(draw,font):
 
 def loadBook(bookPath):
     global fullBook
+    fullBook = []
     bookRead = epub.read_epub(bookPath)
     for chapter in bookRead.get_items_of_type(ebooklib.ITEM_DOCUMENT): # loop all chapters in book
         soup = BeautifulSoup(chapter.get_body_content(),'html5lib')
@@ -129,8 +130,8 @@ def loadBook(bookPath):
         #chapterString = chapterString.replace("\n","")
         #chapterString = [chapterString[i:i+screenWidth] for i in range(0,len(chapterString),screenWidth)] 
         chapterText = textwrap.wrap(chapterString,width=screenWidth)
-        for x in chapterText # append chapter to fullBook
-            fullBook.append(chapterText[x])
+        for x in chapterText: # append chapter to fullBook
+            fullBook.append(x)
 
 def printPage(pageNum):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
