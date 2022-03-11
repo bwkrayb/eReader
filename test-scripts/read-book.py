@@ -3,7 +3,8 @@ import ebooklib
 import time
 from ebooklib import epub
 
-book = epub.read_epub('books/Harry-Potter-1.epub')
+#book = epub.read_epub('/home/pi/reader/books/Harry-Potter-1.epub')
+book = epub.read_epub('/home/pi/reader/books/84.epub')
 fullBook = []
 screenHeight=23
 
@@ -22,7 +23,9 @@ for html in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
         fullBook.append(i)
 #        x+=1
 
+title = book.get_metadata('DC','title')[0][0]
 
+print(title)
 
 def printPage(pageNum):
     print("pageNum: " + str(pageNum))
@@ -32,13 +35,13 @@ def printPage(pageNum):
         if listIndex < len(fullBook):
             print(fullBook[listIndex])
 
-printPage(0)
-printPage(1)
-printPage(2) # only has 2 lines
-printPage(5) # page doesn't exist, no lines
-printPage(50)
-printPage(51)
-printPage(52)
+#printPage(0)
+#printPage(1)
+#printPage(2) # only has 2 lines
+#printPage(5) # page doesn't exist, no lines
+#printPage(50)
+#printPage(51)
+#printPage(52)
 
 
     #print(htmlList)

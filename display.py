@@ -15,16 +15,19 @@ btn1 = Button(5)
 btn2 = Button(6)
 btn3 = Button(13)
 btn4 = Button(19) 
-FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
-fontBook = ImageFont.truetype(FONT,10)
-fontLg = ImageFont.truetype(FONT,30)
-fontMenu = ImageFont.truetype(FONT,10)
+fonts_dir='fonts/'
+BOOKFONT = fonts_dir + 'DejaVuSansMono.ttf'
+LARGEFONT = fonts_dir + 'Lobster-Regular.ttf'
+fontBook = ImageFont.truetype(BOOKFONT,10)
+fontLg = ImageFont.truetype(LARGEFONT,44)
+fontMenu = ImageFont.truetype(BOOKFONT,10)
+fontBookTitle = ImageFont.truetype(BOOKFONT,20)
 refreshCount = 0
 pageNum = 0
 bookNum = 0
 bookLen = 0
-screenWidthChar = 0
-screenHeightChar = 0
+#screenWidthChar = 0
+#screenHeightChar = 0
 books_dir='books/'
 cache_dir='cache/'
 bookNameList = []
@@ -40,16 +43,25 @@ epd.init()              # initialize the display
 epd.Clear()             # clear the display
 
 
-def getCharScrSz():
+def getCharScrSz(font,font2):
     global screenWidthChar
+    global screenWidthCharBT
     global screenHeightChar
+    global screenHeightCharBT
     global lineHeight
+    global lineHeightBT
     charStr=''
-    while fontBook.getsize(charStr)[0] < (w-6):
+    while font.getsize(charStr)[0] < (w-6):
         charStr += 'a'
     screenWidthChar = len(charStr)
-    screenHeightChar = round((h-30) / fontBook.getsize(charStr)[1])
-    lineHeight = fontBook.getsize(charStr)[1]
+    screenHeightChar = round((h-30) / font.getsize(charStr)[1])
+    lineHeight = font.getsize(charStr)[1]
+    charStr=''
+    while font2.getsize(charStr)[0] < (w-6):
+        charStr += 'a'
+    screenWidthCharBT = len(charStr)
+    screenHeightCharBT = round((h-30) / font2.getsize(charStr)[1])
+    lineHeightBT = font2.getsize(charStr)[1]
 
 def checkLastRead():
     global book
@@ -91,7 +103,13 @@ def printToDisplay(string):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
     draw.text((indent(string,fontLg,w), 2), string, font = fontLg, fill = 0)
-    draw.text((indent(book,fontBook,w),100),book,font=fontBook,fill=0)
+    bookVar = epub.read_epub(books_dir + book)
+    bookTitle = bookVar.get_metadata('DC','title')[0][0]
+    bookTitleWrap = wrap(bookTitle,width=screenWidthCharBT)
+    x = 1
+    for i in bookTitleWrap:
+        draw.text((indent(i,fontBookTitle,w),70+x*lineHeightBT),i,font=fontBookTitle,fill=0)
+        x+=1
     printMenuInterface(draw)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
@@ -99,7 +117,7 @@ def printToDisplay(string):
 def printToSplash(string):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
-    draw.text((indent(string,fontLg,w), 100), string, font = fontLg, fill = 0)
+    draw.text((indent(string,fontLg,w), 90), string, font = fontLg, fill = 0)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
 
@@ -230,7 +248,7 @@ def pageTurnLoop():
             break
 
 try:
-    getCharScrSz()
+    getCharScrSz(fontBook,fontBookTitle)
     checkLastRead()
     printToDisplay('Welcome!')
     menuLoop()
