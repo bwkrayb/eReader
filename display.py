@@ -21,13 +21,11 @@ LARGEFONT = fonts_dir + 'Lobster-Regular.ttf'
 fontBook = ImageFont.truetype(BOOKFONT,10)
 fontLg = ImageFont.truetype(LARGEFONT,44)
 fontMenu = ImageFont.truetype(BOOKFONT,10)
-fontBookTitle = ImageFont.truetype(BOOKFONT,20)
+fontBookTitle = ImageFont.truetype(BOOKFONT,17)
 refreshCount = 0
 pageNum = 0
 bookNum = 0
 bookLen = 0
-#screenWidthChar = 0
-#screenHeightChar = 0
 books_dir='books/'
 cache_dir='cache/'
 bookNameList = []
@@ -36,6 +34,9 @@ bookListFull = sorted(glob(books_dir + "*.epub"))
 for i in bookListFull:
     x = i.split('/')
     bookNameList.append(x[-1])
+bookTitleList = []
+for i in bookNameList:
+    bookTitleList.append(epub.read_epub(books_dir+i).get_metadata('DC','title')[0][0])
 epd = epd2in7.EPD() #264 by 174
 h = epd.height
 w = epd.width
@@ -57,7 +58,7 @@ def getCharScrSz(font,font2):
     screenHeightChar = round((h-30) / font.getsize(charStr)[1])
     lineHeight = font.getsize(charStr)[1]
     charStr=''
-    while font2.getsize(charStr)[0] < (w-6):
+    while font2.getsize(charStr)[0] < (w-20):
         charStr += 'a'
     screenWidthCharBT = len(charStr)
     screenHeightCharBT = round((h-30) / font2.getsize(charStr)[1])
@@ -103,8 +104,9 @@ def printToDisplay(string):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
     draw.text((indent(string,fontLg,w), 2), string, font = fontLg, fill = 0)
-    bookVar = epub.read_epub(books_dir + book)
-    bookTitle = bookVar.get_metadata('DC','title')[0][0]
+    #bookVar = epub.read_epub(books_dir + book)
+    #bookTitle = epub.read_epub(books_dir+book).get_metadata('DC','title')[0][0]
+    bookTitle = bookTitleList[bookNum]
     bookTitleWrap = wrap(bookTitle,width=screenWidthCharBT)
     x = 1
     for i in bookTitleWrap:
@@ -254,4 +256,5 @@ try:
     menuLoop()
 
 except IOError as e:
+    epd.sleep()
     print(e)
