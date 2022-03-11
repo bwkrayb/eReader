@@ -1,6 +1,6 @@
 from PIL import Image,ImageDraw,ImageFont 
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
-font = ImageFont.truetype(FONT,15)
+font = ImageFont.truetype(FONT,10)
 
 
 w = 174
@@ -17,7 +17,7 @@ def getCharScrSz(w,h):
     while font.getsize(charStr)[0] < w:
         charStr += 'a'
     screenWidthChar = len(charStr)
-    screenHeightChar = h / font.getsize(charStr)[1]
+    screenHeightChar = round(h / font.getsize(charStr)[1])
 
 
 getCharScrSz(pixelWidth,pixelHeight)
