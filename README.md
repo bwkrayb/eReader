@@ -15,5 +15,6 @@ I added an entry to crontab that calls bin/start.sh on boot, so the eReader soft
 
 #### ChangeLog ####
 * On 3/11, added function to make the page width and height dynamic based on font and font size. This can make the pages a little wonky and will mess up the last page you read, but this sets up the future for getting this working on larger screens (that have partial refresh so the page turns could be potentially quicker).
-
+* On 3/6, merged HcNguyen111's suggested changes to optimize the book loading function and for better variable/function names.
+* On 3/4, implemented the main menu function to allow for book selection.
 
