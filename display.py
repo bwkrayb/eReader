@@ -47,11 +47,15 @@ epd.Clear()             # clear the display
 def getCharScrSz():
     global screenWidthChar
     global screenHeightChar
+    global lineHeight
     charStr=''
-    while fontBook.getsize(charStr)[0] < w:
+    while fontBook.getsize(charStr)[0] < (w-4):
         charStr += 'a'
     screenWidthChar = len(charStr)
     screenHeightChar = round((h-30) / fontBook.getsize(charStr)[1])
+    lineHeight = fontBook.getsize(charStr)[1]
+    #print(screenWidthChar)
+    #print(screenHeightChar)
 
 def checkLastRead():
     global book
@@ -151,7 +155,7 @@ def printPage(pageNum):
     for i in range(screenHeightChar):
         listIndex = (pageNum * screenHeightChar) + i
         if listIndex < len(fullBook):
-            draw.text((1,i*10),fullBook[listIndex],font=fontBook,fill=0)
+            draw.text((1,i*lineHeight),fullBook[listIndex],font=fontBook,fill=0)
     printInterface(draw)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
