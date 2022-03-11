@@ -16,12 +16,20 @@ btn2 = Button(6)
 btn3 = Button(13)
 btn4 = Button(19) 
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
+fontBook = ImageFont.truetype(FONT,10)
+fontLg = ImageFont.truetype(FONT,30)
+fontMenu = ImageFont.truetype(FONT,10)
 refreshCount = 0
 pageNum = 0
 bookNum = 0
 bookLen = 0
-screenWidth = 29
-screenHeight = 23
+
+screenWidthChar = 0
+screenHeightChar = 0
+
+
+#screenWidth = 29
+#screenHeight = 23
 books_dir='books/'
 cache_dir='cache/'
 bookNameList = []
@@ -35,6 +43,15 @@ h = epd.height
 w = epd.width
 epd.init()              # initialize the display
 epd.Clear()             # clear the display
+
+def getCharScrSz():
+    global screenWidthChar
+    global screenHeightChar
+    charStr=''
+    while fontBook.getsize(charStr)[0] < w:
+        charStr += 'a'
+    screenWidthChar = len(charStr)
+    screenHeightChar = round((h-30) / fontBook.getsize(charStr)[1])
 
 def checkLastRead():
     global book
@@ -55,14 +72,14 @@ def checkLastPage():
         pageNumStr = f.read()
         #pageNumList = [line.strip() for line in pageNumStr]
         pageNum = int(pageNumStr)
-        bookLen = ceil(len(fullBook) / screenHeight)
+        bookLen = ceil(len(fullBook) / screenHeightChar)
         f.close()
     else:
         pageNum = 0
-        bookLen = ceil(len(fullBook) / screenHeight)
+        bookLen = ceil(len(fullBook) / screenHeightChar)
  
 def pageNumCache():
-    bookLen = ceil(len(fullBook) / screenHeight)
+    bookLen = ceil(len(fullBook) / screenHeightChar)
     bookFileName=book.split('.')
     f = open(cache_dir + bookFileName[0]+'.cache','w')
     f.write(str(pageNum))
@@ -76,44 +93,44 @@ def lastReadCache():
 def printToDisplay(string):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
-    font = ImageFont.truetype(FONT,30)
-    fontPageNum = ImageFont.truetype(FONT,10)
-    draw.text((indent(string,font,w), 2), string, font = font, fill = 0)
-    draw.text((indent(book,fontPageNum,w),100),book,font=fontPageNum,fill=0)
-    printMenuInterface(draw,fontPageNum)
+    #fontLg = ImageFont.truetype(FONT,30)
+    #fontBook = ImageFont.truetype(FONT,10)
+    draw.text((indent(string,fontLg,w), 2), string, font = fontLg, fill = 0)
+    draw.text((indent(book,fontBook,w),100),book,font=fontBook,fill=0)
+    printMenuInterface(draw)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
 
 def printToSplash(string):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
-    font = ImageFont.truetype(FONT,30)
-    fontPageNum = ImageFont.truetype(FONT,10)
-    draw.text((indent(string,font,w), 100), string, font = font, fill = 0)
+    #font = ImageFont.truetype(FONT,30)
+    #fontPageNum = ImageFont.truetype(FONT,10)
+    draw.text((indent(string,fontLg,w), 100), string, font = fontLg, fill = 0)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
 
-def printInterface(draw,font):
+def printInterface(draw):
     draw.line((0,250,174,250),fill=0,width=1)
     draw.line((43,250,43,264),fill=0,width=1)
     draw.line((87,250,87,264),fill=0,width=1)
     draw.line((130,250,130,264),fill=0,width=1)
-    draw.text((indent('Menu',font,w/4),250),'Menu',font=font,fill=0)
-    draw.text((indent('Prev',font,w/4)+43,250),'Prev',font=font,fill=0)
-    draw.text((indent('Next',font,w/4)+87,250),'Next',font=font,fill=0)
-    draw.text((indent('Back',font,w/4)+130,250),'Back',font=font,fill=0)
-    draw.text((indent(str(pageNum),font,w)+80, 235), str(pageNum), font = font, fill = 0)
+    draw.text((indent('Menu',fontMenu,w/4),250),'Menu',font=fontMenu,fill=0)
+    draw.text((indent('Prev',fontMenu,w/4)+43,250),'Prev',font=fontMenu,fill=0)
+    draw.text((indent('Next',fontMenu,w/4)+87,250),'Next',font=fontMenu,fill=0)
+    draw.text((indent('Back',fontMenu,w/4)+130,250),'Back',font=fontMenu,fill=0)
+    draw.text((indent(str(pageNum),fontMenu,w)+80, 235), str(pageNum), font = fontMenu, fill = 0)
 
-def printMenuInterface(draw,font):
+def printMenuInterface(draw):
     draw.line((0,250,174,250),fill=0,width=1)
     draw.line((43,250,43,264),fill=0,width=1)
     draw.line((87,250,87,264),fill=0,width=1)
     draw.line((130,250,130,264),fill=0,width=1)
-    draw.text((indent('Sel.',font,w/4),250),'Sel.',font=font,fill=0)
-    draw.text((indent('Prev',font,w/4)+43,250),'Prev',font=font,fill=0)
-    draw.text((indent('Next',font,w/4)+87,250),'Next',font=font,fill=0)
-    draw.text((indent('Quit',font,w/4)+130,250),'Quit',font=font,fill=0)
-    #draw.text((indent(str(pageNum),font,w)+80, 235), str(pageNum), font = font, fill = 0)
+    draw.text((indent('Sel.',fontMenu,w/4),250),'Sel.',font=fontMenu,fill=0)
+    draw.text((indent('Prev',fontMenu,w/4)+43,250),'Prev',font=fontMenu,fill=0)
+    draw.text((indent('Next',fontMenu,w/4)+87,250),'Next',font=fontMenu,fill=0)
+    draw.text((indent('Quit',fontMenu,w/4)+130,250),'Quit',font=fontMenu,fill=0)
+    #draw.text((indent(str(pageNum),fontMenu,w)+80, 235), str(pageNum), font = fontMenu, fill = 0)
 
 def loadBook(bookPath):
     global fullBook
@@ -123,19 +140,19 @@ def loadBook(bookPath):
         soup = BeautifulSoup(chapter.get_body_content(),'html5lib')
         chapterString = soup.get_text()
         chapterString = chapterString.replace("\t","").replace("\r","").replace("    "," ")##.replace("\n","")
-        chapterText = wrap(chapterString,width=screenWidth)
+        chapterText = wrap(chapterString,width=screenWidthChar)
         for x in chapterText: # append chapter to fullBook
             fullBook.append(x)
 
 def printPage(pageNum):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
-    font = ImageFont.truetype(FONT,10) 
-    for i in range(screenHeight):
-        listIndex = (pageNum * screenHeight) + i
+    #fontBook = ImageFont.truetype(FONT,10) 
+    for i in range(screenHeightChar):
+        listIndex = (pageNum * screenHeightChar) + i
         if listIndex < len(fullBook):
-            draw.text((1,i*10),fullBook[listIndex],font=font,fill=0)
-    printInterface(draw,font)
+            draw.text((1,i*10),fullBook[listIndex],font=fontBook,fill=0)
+    printInterface(draw)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
     pageNumCache()
@@ -222,6 +239,7 @@ def pageTurnLoop():
             break
 
 try:
+    getCharScrSz()
     checkLastRead()
     printToDisplay('Welcome!')
     menuLoop()
