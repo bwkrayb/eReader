@@ -23,13 +23,8 @@ refreshCount = 0
 pageNum = 0
 bookNum = 0
 bookLen = 0
-
 screenWidthChar = 0
 screenHeightChar = 0
-
-
-#screenWidth = 29
-#screenHeight = 23
 books_dir='books/'
 cache_dir='cache/'
 bookNameList = []
@@ -44,18 +39,17 @@ w = epd.width
 epd.init()              # initialize the display
 epd.Clear()             # clear the display
 
+
 def getCharScrSz():
     global screenWidthChar
     global screenHeightChar
     global lineHeight
     charStr=''
-    while fontBook.getsize(charStr)[0] < (w-4):
+    while fontBook.getsize(charStr)[0] < (w-6):
         charStr += 'a'
     screenWidthChar = len(charStr)
     screenHeightChar = round((h-30) / fontBook.getsize(charStr)[1])
     lineHeight = fontBook.getsize(charStr)[1]
-    #print(screenWidthChar)
-    #print(screenHeightChar)
 
 def checkLastRead():
     global book
@@ -74,7 +68,6 @@ def checkLastPage():
     if path.exists(cache_dir + book.split('.')[0] + '.cache'):
         f = open(cache_dir + book.split('.')[0] + '.cache')
         pageNumStr = f.read()
-        #pageNumList = [line.strip() for line in pageNumStr]
         pageNum = int(pageNumStr)
         bookLen = ceil(len(fullBook) / screenHeightChar)
         f.close()
@@ -97,8 +90,6 @@ def lastReadCache():
 def printToDisplay(string):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
-    #fontLg = ImageFont.truetype(FONT,30)
-    #fontBook = ImageFont.truetype(FONT,10)
     draw.text((indent(string,fontLg,w), 2), string, font = fontLg, fill = 0)
     draw.text((indent(book,fontBook,w),100),book,font=fontBook,fill=0)
     printMenuInterface(draw)
@@ -108,8 +99,6 @@ def printToDisplay(string):
 def printToSplash(string):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
-    #font = ImageFont.truetype(FONT,30)
-    #fontPageNum = ImageFont.truetype(FONT,10)
     draw.text((indent(string,fontLg,w), 100), string, font = fontLg, fill = 0)
     screenCleanup()
     epd.display(epd.getbuffer(HBlackImage))
@@ -134,7 +123,6 @@ def printMenuInterface(draw):
     draw.text((indent('Prev',fontMenu,w/4)+43,250),'Prev',font=fontMenu,fill=0)
     draw.text((indent('Next',fontMenu,w/4)+87,250),'Next',font=fontMenu,fill=0)
     draw.text((indent('Quit',fontMenu,w/4)+130,250),'Quit',font=fontMenu,fill=0)
-    #draw.text((indent(str(pageNum),fontMenu,w)+80, 235), str(pageNum), font = fontMenu, fill = 0)
 
 def loadBook(bookPath):
     global fullBook
@@ -151,7 +139,6 @@ def loadBook(bookPath):
 def printPage(pageNum):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
-    #fontBook = ImageFont.truetype(FONT,10) 
     for i in range(screenHeightChar):
         listIndex = (pageNum * screenHeightChar) + i
         if listIndex < len(fullBook):
