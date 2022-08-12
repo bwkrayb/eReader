@@ -22,6 +22,7 @@ fontBook = ImageFont.truetype(BOOKFONT,10)
 fontLg = ImageFont.truetype(LARGEFONT,44)
 fontMenu = ImageFont.truetype(BOOKFONT,10)
 fontBookTitle = ImageFont.truetype(BOOKFONT,17)
+fontLogo = ImageFont.truetype(LARGEFONT,17)
 refreshCount = 0
 pageNum = 0
 bookNum = 0
@@ -104,8 +105,7 @@ def printToDisplay(string):
     HBlackImage = Image.new('1', (w, h), 255)  # 264x174
     draw = ImageDraw.Draw(HBlackImage)
     draw.text((indent(string,fontLg,w), 2), string, font = fontLg, fill = 0)
-    #bookVar = epub.read_epub(books_dir + book)
-    #bookTitle = epub.read_epub(books_dir+book).get_metadata('DC','title')[0][0]
+    draw.text((indent('piReader',fontLogo,w),50),'piReader',font=fontLogo,fill=0)
     bookTitle = bookTitleList[bookNum]
     bookTitleWrap = wrap(bookTitle,width=screenWidthCharBT)
     x = 1
@@ -151,7 +151,7 @@ def loadBook(bookPath):
     for chapter in bookRead.get_items_of_type(ebooklib.ITEM_DOCUMENT): # loop all chapters in book
         soup = BeautifulSoup(chapter.get_body_content(),'html5lib')
         chapterString = soup.get_text()
-        chapterString = chapterString.replace("\t","").replace("\r","").replace("    "," ")##.replace("\n","")
+        #chapterString = chapterString.replace("\t","").replace("\r","").replace("    "," ")##.replace("\n","")
         chapterText = wrap(chapterString,width=screenWidthChar)
         for x in chapterText: # append chapter to fullBook
             fullBook.append(x)
